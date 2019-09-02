@@ -30,6 +30,9 @@ public class Contacts extends Plugin {
     public static final String EMAILS = "emails";
     public static final String PHONE_NUMBERS = "phoneNumbers";
     public static final String LOOKUP_KEY = "lookupKey";
+    public static final String DISPLAY_NAME = "displayName";
+    public static final String ORGANIZATION_NAME = "organizationName";
+    public static final String ORGANIZATION_ROLE = "organizationRole";
 
     @PluginMethod()
     public void getContacts(PluginCall call) {
@@ -48,8 +51,9 @@ public class Contacts extends Plugin {
             String contactId = dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Contacts._ID));
             jsContact.put(CONTACT_ID, contactId);
             jsContact.put(LOOKUP_KEY, dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY)));
-            jsContact.put("displayName", dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)));
+            jsContact.put(DISPLAY_NAME, dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)));
 
+            addOrganization(jsContact);
             addPhoneNumbers(jsContact);
             addEmails(jsContact);
             jsContacts.put(jsContact);
@@ -58,6 +62,26 @@ public class Contacts extends Plugin {
 
         result.put("contacts", jsContacts);
         call.success(result);
+    }
+
+    private void addOrganization(JSObject jsContact) {
+        try {
+            String contactId = (String) jsContact.get(CONTACT_ID);
+            String orgWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+            String[] orgWhereParams = new String[]{contactId,
+                    ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE};
+            Cursor orgCur = getContext().getContentResolver().query(ContactsContract.Data.CONTENT_URI,
+                    null, orgWhere, orgWhereParams, null);
+            while (orgCur.moveToNext()) {
+                String orgName = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.DATA));
+                jsContact.put(ORGANIZATION_NAME, orgName);
+                String role = orgCur.getString(orgCur.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE));
+                jsContact.put(ORGANIZATION_ROLE, role);
+            }
+            orgCur.close();
+        } catch (JSONException e) {
+            Log.e("Contacts", "JSONException addOrganization");
+        }
     }
 
     @PluginMethod()
@@ -134,7 +158,7 @@ public class Contacts extends Plugin {
 
     private void addEmails(JSObject jsContact) {
         try {
-            jsContact.put(EMAILS, new JSArray());
+            JSArray emails = new JSArray();
             String contactId = (String) jsContact.get(CONTACT_ID);
             Cursor cur1 = getContext().getContentResolver().query(
                     ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
@@ -142,10 +166,11 @@ public class Contacts extends Plugin {
                     new String[]{contactId}, null);
             while (cur1.moveToNext()) {
                 String email = cur1.getString(cur1.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-                JSArray emails = (JSArray) jsContact.get(EMAILS);
                 emails.put(email);
             }
             cur1.close();
+
+            jsContact.put(EMAILS, emails);
         } catch (JSONException e) {
             Log.e("Contacts", "JSONException addEmails");
         }
@@ -153,7 +178,7 @@ public class Contacts extends Plugin {
 
     private void addPhoneNumbers(JSObject jsContact) {
         try {
-            jsContact.put(PHONE_NUMBERS, new JSArray());
+            JSArray phoneNumbers = new JSArray();
             String contactId = (String) jsContact.get(CONTACT_ID);
             Cursor cur1 = getContext().getContentResolver().query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
@@ -161,10 +186,11 @@ public class Contacts extends Plugin {
                     new String[]{contactId}, null);
             while (cur1.moveToNext()) {
                 String phoneNumber = cur1.getString(cur1.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                JSArray phoneNumbers = (JSArray) jsContact.get(PHONE_NUMBERS);
                 phoneNumbers.put(phoneNumber);
             }
             cur1.close();
+
+            jsContact.put(PHONE_NUMBERS, phoneNumbers);
         } catch (JSONException e) {
             Log.e("Contacts", "JSONException addPhoneNumbers");
         }
