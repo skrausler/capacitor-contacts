@@ -89,7 +89,7 @@ public class Contacts extends Plugin {
                     ContactsContract.CommonDataKinds.Event.TYPE + "=" +
                     ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY;
             String[] orgWhereParams = new String[]{contactId,
-                    ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE};
+                    ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE};
             Cursor cur = getContext().getContentResolver().query(ContactsContract.Data.CONTENT_URI,
                     null, orgWhere, orgWhereParams, null);
             while (cur.moveToNext()) {
