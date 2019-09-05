@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@NativePlugin(permissions = {Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS})
+@NativePlugin(permissionRequestCode = 1, permissions = {Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS})
 public class Contacts extends Plugin {
 
     public static final String CONTACT_ID = "contactId";
@@ -33,11 +33,12 @@ public class Contacts extends Plugin {
 
     @PluginMethod()
     public void getPermissions(PluginCall call) {
-        if(!hasRequiredPermissions()) {
-            pluginRequestAllPermissions();
+        if (!hasRequiredPermissions()) {
+            requestPermissions(call);
+        } else {
+            JSObject result = new JSObject();
+            call.success(result);
         }
-        JSObject result = new JSObject();
-        call.success(result);
     }
 
     @Override
@@ -45,7 +46,11 @@ public class Contacts extends Plugin {
         super.handleRequestPermissionsResult(requestCode, permissions, grantResults);
 
         PluginCall savedCall = getSavedCall();
-        savedCall.success();
+        if (!hasRequiredPermissions()) {
+            savedCall.error("Permissions not granted.");
+        } else {
+            savedCall.success();
+        }
     }
 
     @PluginMethod()
