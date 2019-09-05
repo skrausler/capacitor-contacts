@@ -32,7 +32,7 @@ public class Contacts extends Plugin {
     public static final String ORGANIZATION_ROLE = "organizationRole";
 
     @PluginMethod()
-    public void requestPermissions(PluginCall call) {
+    public void getPermissions(PluginCall call) {
         if(!hasRequiredPermissions()) {
             pluginRequestAllPermissions();
         }

@@ -1,6 +1,6 @@
 {
   "name": "capacitor-contacts",
-  "version": "0.0.25",
+  "version": "0.0.27",
   "description": "contacts plugin",
   "main": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
@@ -13,7 +13,7 @@
   "author": "Stefan Krausler-Baumann",
   "license": "MIT",
   "dependencies": {
-    "@capacitor/core": "latest"
+    "@capacitor/core": "1.1.1"
   },
   "devDependencies": {
     "typescript": "^3.2.4",

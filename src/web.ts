@@ -9,7 +9,7 @@ export class ContactsWeb extends WebPlugin implements ContactsPlugin {
         });
     }
 
-    async requestPermissions(): Promise<any> {
+    async getPermissions(): Promise<any> {
         console.log('REQUEST_PERMISSIONS', 'called');
         return {};
     }
