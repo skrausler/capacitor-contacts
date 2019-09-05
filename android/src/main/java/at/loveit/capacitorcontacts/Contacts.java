@@ -30,6 +30,7 @@ public class Contacts extends Plugin {
     public static final String DISPLAY_NAME = "displayName";
     public static final String ORGANIZATION_NAME = "organizationName";
     public static final String ORGANIZATION_ROLE = "organizationRole";
+    public static final String BIRTHDAY = "birthday";
 
     @PluginMethod()
     public void getPermissions(PluginCall call) {
@@ -72,12 +73,33 @@ public class Contacts extends Plugin {
             addOrganization(jsContact);
             addPhoneNumbers(jsContact);
             addEmails(jsContact);
+            addBirthday(jsContact);
             jsContacts.put(jsContact);
         }
         dataCursor.close();
 
         result.put("contacts", jsContacts);
         call.success(result);
+    }
+
+    private void addBirthday(JSObject jsContact) {
+        try {
+            String contactId = (String) jsContact.get(CONTACT_ID);
+            String orgWhere = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ? AND " +
+                    ContactsContract.CommonDataKinds.Event.TYPE + "=" +
+                    ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY;
+            String[] orgWhereParams = new String[]{contactId,
+                    ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE};
+            Cursor cur = getContext().getContentResolver().query(ContactsContract.Data.CONTENT_URI,
+                    null, orgWhere, orgWhereParams, null);
+            while (cur.moveToNext()) {
+                String birthday = cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Event.START_DATE));
+                jsContact.put(BIRTHDAY, birthday);
+            }
+            cur.close();
+        } catch (JSONException e) {
+            Log.e("Contacts", "JSONException addBirthday");
+        }
     }
 
     private void addOrganization(JSObject jsContact) {
