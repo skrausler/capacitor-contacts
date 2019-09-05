@@ -3,7 +3,6 @@ package at.loveit.capacitorcontacts;
 import android.Manifest;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.ContactsContract;
 import android.util.Log;
 
@@ -24,8 +23,6 @@ import java.util.Set;
 @NativePlugin(permissions = {Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS})
 public class Contacts extends Plugin {
 
-    static final int REQUEST_CONTACTS_PERMISSIONS = 12345;
-
     public static final String CONTACT_ID = "contactId";
     public static final String EMAILS = "emails";
     public static final String PHONE_NUMBERS = "phoneNumbers";
@@ -35,10 +32,24 @@ public class Contacts extends Plugin {
     public static final String ORGANIZATION_ROLE = "organizationRole";
 
     @PluginMethod()
+    public void requestPermissions(PluginCall call) {
+        if(!hasRequiredPermissions()) {
+            pluginRequestAllPermissions();
+        }
+        JSObject result = new JSObject();
+        call.success(result);
+    }
+
+    @Override
+    protected void handleRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.handleRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        PluginCall savedCall = getSavedCall();
+        savedCall.success();
+    }
+
+    @PluginMethod()
     public void getContacts(PluginCall call) {
-
-        requestPermissions();
-
         JSObject result = new JSObject();
         JSArray jsContacts = new JSArray();
         Cursor dataCursor = getContext().getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
@@ -86,9 +97,6 @@ public class Contacts extends Plugin {
 
     @PluginMethod()
     public void getGroups(PluginCall call) {
-
-        requestPermissions();
-
         JSObject result = new JSObject();
         JSArray jsGroups = new JSArray();
         Cursor dataCursor = getContext().getContentResolver().query(ContactsContract.Groups.CONTENT_URI,
@@ -114,9 +122,6 @@ public class Contacts extends Plugin {
 
     @PluginMethod()
     public void getContactGroups(PluginCall call) {
-
-        requestPermissions();
-
         Cursor dataCursor = getContext().getContentResolver().query(ContactsContract.Data.CONTENT_URI,
                 new String[]{ContactsContract.Data.CONTACT_ID,
                         ContactsContract.Data.DATA1},
@@ -147,13 +152,6 @@ public class Contacts extends Plugin {
         }
 
         call.success(result);
-    }
-
-    private void requestPermissions() {
-        pluginRequestPermissions(new String[]{
-                Manifest.permission.READ_CONTACTS,
-                Manifest.permission.WRITE_CONTACTS
-        }, REQUEST_CONTACTS_PERMISSIONS);
     }
 
     private void addEmails(JSObject jsContact) {
@@ -198,9 +196,6 @@ public class Contacts extends Plugin {
 
     @PluginMethod()
     public void deleteContact(PluginCall call) {
-
-        requestPermissions();
-
         Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, call.getString(LOOKUP_KEY));
         getContext().getContentResolver().delete(uri, null, null);
 

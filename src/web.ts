@@ -9,6 +9,11 @@ export class ContactsWeb extends WebPlugin implements ContactsPlugin {
         });
     }
 
+    async requestPermissions(): Promise<any> {
+        console.log('REQUEST_PERMISSIONS', 'called');
+        return {};
+    }
+
     async getContacts(): Promise<{ contacts: Array<any> }> {
         console.log('GET_CONTACTS', 'called');
         return {contacts: []};
