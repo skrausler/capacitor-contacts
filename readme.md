@@ -6,6 +6,7 @@ ionic capacitor sync\
 ionic capacitor run android
 
 # Code Example Select
+<pre><code>
 import {ContactsWeb} from 'capacitor-contacts';
 
 const contactsService = Plugins.Contacts as ContactsWeb;
@@ -26,12 +27,15 @@ contactsService.getPermissions().then(() => {
             this.groups = groups;
             this.contactGroups = contactGroups;
         });
+</pre></code>
  
 #Code Example Delete
+<pre><code>
 const contacts = Plugins.Contacts as ContactsWeb;
 contacts.deleteContact(duplicate.duplicate).then(() => {
     ... success
 });
+</pre></code>
 
 # Publish a new version
 Increase version number of this plugin in package.json.
