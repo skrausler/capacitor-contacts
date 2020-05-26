@@ -1,7 +1,7 @@
 # Use
-npm install capacitor-contacts
-ionic capacitor sync
-ionic capacitor run android|ios
+npm install capacitor-contacts\
+ionic capacitor sync\
+ionic capacitor run android|ios\
 
 # Publish a new version
 Increase version number of this plugin in package.json.
