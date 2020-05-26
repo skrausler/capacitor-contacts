@@ -1,3 +1,5 @@
+# Info
+only implemented the android part at the moment
 # Use
 npm install capacitor-contacts\
 ionic capacitor sync\
